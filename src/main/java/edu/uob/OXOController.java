@@ -12,6 +12,9 @@ public class OXOController {
     }
 
     public void handleIncomingCommand(String command) throws OXOMoveException {
+        if(gameModel.isGameDrawn()){
+            return;
+        }
         new OXOModel(3, 3, 3);
         int curPlayerNum = gameModel.getCurrentPlayerNumber();
         gameModel.setCurrentPlayerNumber(curPlayerNum);
@@ -34,10 +37,29 @@ public class OXOController {
         int winThreshold = gameModel.getWinThreshold();
         if(horizontalWin(rowNumber, currPlayer, winThreshold) ||
             verticalWin(colNumber, currPlayer, winThreshold) ||
-            diagWin(rowNumber, colNumber, currPlayer, winThreshold)){
+            diagWin(currPlayer, winThreshold)){
             gameModel.setWinner(currPlayer);
         }
 
+        if(isDraw()){
+            gameModel.setGameDrawn();
+        }
+
+    }
+
+    private boolean isDraw(){
+        int drawCounter = 0;
+        for (int i = 0; i < gameModel.getNumberOfRows(); i++) {
+            for (int j = 0; j < gameModel.getNumberOfColumns(); j++) {
+                if(gameModel.getCellOwner(i, j) == null){
+                    drawCounter++;
+                }
+            }
+        }
+        if(drawCounter == 0){
+            return true;
+        }
+        return false;
     }
 
     private boolean horizontalWin(int rowNumber, OXOPlayer currPlayer, int winThreshold){
@@ -82,14 +104,17 @@ public class OXOController {
         return false;
     }
 
-    private boolean diagWin(int rowNumber, int colNumber, OXOPlayer currPlayer, int winThreshold){
+    private boolean diagWin(OXOPlayer currPlayer, int winThreshold){
         int diagCounter = 0;
-        int smalSide = Math.min(gameModel.getNumberOfColumns(), gameModel.getNumberOfRows());
+        boolean rgt_flag = true;
         for (int i = 0; i < gameModel.getNumberOfRows(); i++) {
             for (int j = 0; j < gameModel.getNumberOfColumns(); j++) {
                 if(gameModel.getCellOwner(i, j) == currPlayer){
-                    int smalNum = Math.max(i, j);
-                    for (int k = 1; k < smalSide - smalNum; k++) {
+                    int minNum_rgt = Math.min(gameModel.getNumberOfRows() - i, gameModel.getNumberOfColumns() - j);
+                    if(minNum_rgt < winThreshold){
+                        rgt_flag = false;
+                    }
+                    for (int k = 0; k < minNum_rgt && rgt_flag; k++) {
                         if(gameModel.getCellOwner(i + k, j + k) != currPlayer){
                             diagCounter = 0;
                         }
@@ -100,6 +125,23 @@ public class OXOController {
                             return true;
                         }
                     }
+                    diagCounter = 0;
+                    boolean lft_flag = true;
+                    int minNum_lft = Math.min(gameModel.getNumberOfRows() - i - 1, j);
+                    if(minNum_lft < winThreshold - 1){
+                        lft_flag = false;
+                    }
+                    for (int l = 0; l <= minNum_lft && lft_flag; l++) {
+                        if(gameModel.getCellOwner(i + l, j - l) != currPlayer){
+                            diagCounter = 0;
+                        }
+                        if(gameModel.getCellOwner(i + l, j - l) == currPlayer){
+                            diagCounter++;
+                        }
+                        if(diagCounter == winThreshold){
+                            return  true;
+                        }
+                    }
                 }
             }
         }
@@ -107,16 +149,24 @@ public class OXOController {
     }
 
     public void addRow() {
-        gameModel.addRow();
+        if(!gameModel.isGameDrawn() && gameModel.getWinner() == null){
+            gameModel.addRow();
+        }
     }
     public void removeRow() {
-        gameModel.removeRow();
+        if(!gameModel.isGameDrawn() && gameModel.getWinner() == null) {
+            gameModel.removeRow();
+        }
     }
     public void addColumn() {
-        gameModel.addColumn();
+        if(!gameModel.isGameDrawn() && gameModel.getWinner() == null){
+            gameModel.addColumn();
+        }
     }
     public void removeColumn() {
-        gameModel.removeColumn();
+        if(!gameModel.isGameDrawn() && gameModel.getWinner() == null) {
+            gameModel.removeColumn();
+        }
     }
     public void increaseWinThreshold() {}
     public void decreaseWinThreshold() {}
@@ -128,6 +178,9 @@ public class OXOController {
         }
         if(gameModel.getWinner() != null){
             gameModel.setWinner(null);
+        }
+        if(gameModel.isGameDrawn()){
+            gameModel.setNotDrawn();
         }
     }
 

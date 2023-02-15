@@ -44,7 +44,7 @@ public class OXOModel {
             System.out.println("Cannot remove the row.");
             return;
         }
-        cells.remove(clm);
+        cells.remove(row - 1);
     }
 
     public void removeColumn(){
@@ -54,8 +54,8 @@ public class OXOModel {
             System.out.println("Cannot remove the column.");
             return;
         }
-        for (int j = 0; j < row; j++) {
-            cells.get(j).remove(row);
+        for (int i = 0; i < row; i++) {
+            cells.get(i).remove(clm - 1);
         }
     }
 
@@ -73,8 +73,8 @@ public class OXOModel {
     }
 
     public int switchPlayer(int curPlayerNum){
-        for(int i = 0; i < players.length; i++){
-            if(i + 1 >= players.length){
+        for(int i = 0; i < getNumberOfPlayers(); i++){
+            if(i + 1 >= getNumberOfPlayers()){
                 currentPlayerNumber = 0;
                 break;
             }
@@ -132,6 +132,10 @@ public class OXOModel {
 
     public void setGameDrawn() {
         gameDrawn = true;
+    }
+
+    public void setNotDrawn(){
+        gameDrawn = false;
     }
 
     public boolean isGameDrawn() {
