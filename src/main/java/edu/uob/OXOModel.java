@@ -31,8 +31,9 @@ public class OXOModel {
     }
 
     public void addColumn(){
-        for (int i = 0; i < getNumberOfRows(); i++) {
-            cells.get(i).add(null);
+        //ArrayList<OXOPlayer> col = new ArrayList<>();
+        for (int j = 0; j < getNumberOfRows(); j++) {
+            cells.get(j).add(null);
         }
     }
 

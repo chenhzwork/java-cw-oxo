@@ -5,7 +5,7 @@ import java.util.Scanner;
 public class OXOController {
     OXOModel gameModel;
 
-    boolean keepScan = true;
+    //boolean keepScan = true;
 
     public OXOController(OXOModel model) {
         gameModel = model;
@@ -23,46 +23,87 @@ public class OXOController {
         }
         int colNumber = command.charAt(1) - 49;
         OXOPlayer currPlayer = gameModel.getPlayerByNumber(curPlayerNum);
-        if (gameModel.getCellOwner(rowNumber, colNumber) == null && keepScan) {
+        if (gameModel.getCellOwner(rowNumber, colNumber) == null && !gameModel.isGameDrawn()
+            && gameModel.getWinner() == null) {
             gameModel.setCellOwner(rowNumber, colNumber, currPlayer);
             gameModel.switchPlayer(curPlayerNum);
         } else {
             System.out.println("Cannot drop.");
         }
-        //whether row met the threshold
-        int rowCounter = 0;
+
         int winThreshold = gameModel.getWinThreshold();
+        if(horizontalWin(rowNumber, currPlayer, winThreshold) ||
+            verticalWin(colNumber, currPlayer, winThreshold) ||
+            diagWin(rowNumber, colNumber, currPlayer, winThreshold)){
+            gameModel.setWinner(currPlayer);
+        }
+
+    }
+
+    private boolean horizontalWin(int rowNumber, OXOPlayer currPlayer, int winThreshold){
+        int rowCounter = 0;
         for (int i = 0; i < gameModel.getNumberOfColumns(); i++) {
             if(gameModel.getCellOwner(rowNumber, i) == currPlayer){
-                while(i < gameModel.getNumberOfColumns()){
-                    if(gameModel.getCellOwner(rowNumber, i) == currPlayer) {
+                for(int cursor = 0; cursor < gameModel.getNumberOfColumns(); cursor++){
+                    if(gameModel.getCellOwner(rowNumber, cursor) != currPlayer){
+                        rowCounter = 0;
+                    }
+                    if(gameModel.getCellOwner(rowNumber, cursor) == currPlayer) {
                         rowCounter++;
                     }
                     if(rowCounter == winThreshold){
-                        gameModel.setWinner(currPlayer);
-                        keepScan = false;
+                        return true;
                     }
-                    i++;
                 }
+                rowCounter = 0;
             }
         }
-        //whether column met the threshold
+        return false;
+    }
+
+    private boolean verticalWin(int colNumber, OXOPlayer currPlayer, int winThreshold){
         int colCounter = 0;
         for (int j = 0; j < gameModel.getNumberOfRows(); j++) {
             if(gameModel.getCellOwner(j, colNumber) == currPlayer){
-                while(j < gameModel.getNumberOfRows()){
-                    if(gameModel.getCellOwner(j, colNumber) == currPlayer) {
+                for(int cursor = 0; cursor < gameModel.getNumberOfRows(); cursor++){
+                    if(gameModel.getCellOwner(cursor, colNumber) != currPlayer){
+                        colCounter = 0;
+                    }
+                    if(gameModel.getCellOwner(cursor, colNumber) == currPlayer) {
                         colCounter++;
                     }
                     if(colCounter == winThreshold){
-                        gameModel.setWinner(currPlayer);
-                        keepScan = false;
+                        return true;
                     }
-                    j++;
+                }
+                colCounter = 0;
+            }
+        }
+        return false;
+    }
+
+    private boolean diagWin(int rowNumber, int colNumber, OXOPlayer currPlayer, int winThreshold){
+        int diagCounter = 0;
+        int smalSide = Math.min(gameModel.getNumberOfColumns(), gameModel.getNumberOfRows());
+        for (int i = 0; i < gameModel.getNumberOfRows(); i++) {
+            for (int j = 0; j < gameModel.getNumberOfColumns(); j++) {
+                if(gameModel.getCellOwner(i, j) == currPlayer){
+                    int smalNum = Math.max(i, j);
+                    for (int k = 1; k < smalSide - smalNum; k++) {
+                        if(gameModel.getCellOwner(i + k, j + k) != currPlayer){
+                            diagCounter = 0;
+                        }
+                        if(gameModel.getCellOwner(i + k, j + k) == currPlayer){
+                            diagCounter++;
+                        }
+                        if(diagCounter == winThreshold){
+                            return true;
+                        }
+                    }
                 }
             }
         }
-        // STOPSHIP: 15/02/2023 判断斜线
+        return false;
     }
 
     public void addRow() {
@@ -84,6 +125,9 @@ public class OXOController {
             for(int j = 0; j < gameModel.getNumberOfColumns(); j++){
                 gameModel.setCellOwner(i, j, null);
             }
+        }
+        if(gameModel.getWinner() != null){
+            gameModel.setWinner(null);
         }
     }
 
