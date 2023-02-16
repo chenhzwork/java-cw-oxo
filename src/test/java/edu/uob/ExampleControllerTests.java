@@ -67,5 +67,7 @@ class ExampleControllerTests {
     String failedTestComment = "Controller failed to throw an InvalidIdentifierLengthException for command `abc123`";
     // The next lins is a bit ugly, but it is the easiest way to test exceptions (soz)
     assertThrows(InvalidIdentifierLengthException.class, ()-> sendCommandToController("abc123"), failedTestComment);
+    assertThrows(InvalidIdentifierLengthException.class, ()-> controller.handleIncomingCommand("aa1"));
+
   }
 }

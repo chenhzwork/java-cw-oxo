@@ -4,7 +4,8 @@ import java.util.ArrayList;
 
 public class OXOModel {
     private ArrayList<ArrayList<OXOPlayer>> cells;
-    private OXOPlayer[] players;
+    //private OXOPlayer[] players;
+    private ArrayList<OXOPlayer> players;
     private int currentPlayerNumber;
     private OXOPlayer winner;
     private boolean gameDrawn;
@@ -19,10 +20,14 @@ public class OXOModel {
                 cells.get(i).add(null);
             }
         }
-        players = new OXOPlayer[2];
+        players = new ArrayList<>();
     }
 
     public void addRow(){
+        if(getNumberOfRows() > 8){
+            System.out.println("The maximum size of the grid is 9x9.");
+            return;
+        }
         ArrayList<OXOPlayer> row = new ArrayList<>();
         for (int i = 0; i < getNumberOfColumns(); i++) {
             row.add(null);
@@ -31,14 +36,16 @@ public class OXOModel {
     }
 
     public void addColumn(){
-        //ArrayList<OXOPlayer> col = new ArrayList<>();
+        if(getNumberOfColumns() > 8){
+            System.out.println("The maximum size of the grid is 9x9.");
+            return;
+        }
         for (int j = 0; j < getNumberOfRows(); j++) {
             cells.get(j).add(null);
         }
     }
 
     public void removeRow(){
-        int clm = getNumberOfColumns();
         int row = getNumberOfRows();
         if(row <= winThreshold){
             System.out.println("Cannot remove the row.");
@@ -60,11 +67,11 @@ public class OXOModel {
     }
 
     public int getNumberOfPlayers() {
-        return players.length;
+        return players.size();
     }
 
     public void addPlayer(OXOPlayer player) {
-        for (int i = 0; i < players.length; i++) {
+        for (int i = 0; i < players.size(); i++) {
             if (players[i] == null) {
                 players[i] = player;
                 return;

@@ -1,6 +1,7 @@
 package edu.uob;
-
+import edu.uob.OXOMoveException.*;
 import java.util.Scanner;
+
 
 public class OXOController {
     OXOModel gameModel;
@@ -15,6 +16,12 @@ public class OXOController {
         if(gameModel.isGameDrawn()){
             return;
         }
+
+        int len = command.length();
+        if (len != 2){
+            throw new InvalidIdentifierLengthException(len);
+        }
+
         new OXOModel(3, 3, 3);
         int curPlayerNum = gameModel.getCurrentPlayerNumber();
         gameModel.setCurrentPlayerNumber(curPlayerNum);
@@ -24,14 +31,37 @@ public class OXOController {
         }else if(command.charAt(0) >= 65 && command.charAt(0) <= 90){
             rowNumber = command.charAt(0) - 65;
         }
-        int colNumber = command.charAt(1) - 49;
+        int colNumber = 0;
+        if(command.charAt(1) > 48 && command.charAt(1) < 58){
+            colNumber = command.charAt(1) - 49;
+        }
         OXOPlayer currPlayer = gameModel.getPlayerByNumber(curPlayerNum);
+
+
+        if (rowNumber + 1 > gameModel.getNumberOfRows()){
+            throw new OutsideCellRangeException(RowOrColumn.ROW, rowNumber);
+        }
+
+        if (colNumber + 1 > gameModel.getNumberOfColumns()){
+            throw new OutsideCellRangeException(RowOrColumn.COLUMN, colNumber);
+        }
+
+        if (gameModel.getCellOwner(rowNumber, colNumber) != null){
+            throw new CellAlreadyTakenException(rowNumber, colNumber);
+        }
+
+        if (command.charAt(0) < 65 || (command.charAt(0) > 73 && command.charAt(0) < 96) || command.charAt(0) > 105){
+            throw new InvalidIdentifierCharacterException(RowOrColumn.ROW, command.charAt(0));
+        }
+
+        if (!Character.isDigit(command.charAt(1))){
+            throw new InvalidIdentifierCharacterException(RowOrColumn.COLUMN, command.charAt(1));
+        }
+
         if (gameModel.getCellOwner(rowNumber, colNumber) == null && !gameModel.isGameDrawn()
-            && gameModel.getWinner() == null) {
+                && gameModel.getWinner() == null) {
             gameModel.setCellOwner(rowNumber, colNumber, currPlayer);
             gameModel.switchPlayer(curPlayerNum);
-        } else {
-            System.out.println("Cannot drop.");
         }
 
         int winThreshold = gameModel.getWinThreshold();
@@ -44,7 +74,6 @@ public class OXOController {
         if(isDraw()){
             gameModel.setGameDrawn();
         }
-
     }
 
     private boolean isDraw(){
@@ -168,8 +197,35 @@ public class OXOController {
             gameModel.removeColumn();
         }
     }
-    public void increaseWinThreshold() {}
-    public void decreaseWinThreshold() {}
+    public void increaseWinThreshold() {
+        if(!isGameStart()){
+            gameModel.setWinThreshold(gameModel.getWinThreshold() + 1);
+            System.out.println("The new win threshold is: " + gameModel.getWinThreshold());
+        }else{
+            System.out.println("Ooops, game has begun!");
+        }
+    }
+    public void decreaseWinThreshold() {
+        if(gameModel.getWinThreshold() < 2){
+            System.out.println("Cannot decrease anymore!");
+            return;
+        }
+        if(!isGameStart()){
+            gameModel.setWinThreshold(gameModel.getWinThreshold() - 1);
+            System.out.println("The new win threshold is: " + gameModel.getWinThreshold());
+        }else{
+            System.out.println("Ooops, game has begun!");
+        }
+    }
+
+    public void addPlayer(){
+        char c = 65;
+        for (int i = 0; i < gameModel.getNumberOfPlayers(); i++) {
+            if(c == gameModel.players[i])
+        }
+        OXOPlayer oxoPlayer = new OXOPlayer();
+        gameModel.addPlayer();
+    }
     public void reset() {
         for(int i = 0; i < gameModel.getNumberOfRows(); i++){
             for(int j = 0; j < gameModel.getNumberOfColumns(); j++){
@@ -182,6 +238,17 @@ public class OXOController {
         if(gameModel.isGameDrawn()){
             gameModel.setNotDrawn();
         }
+    }
+
+    public boolean isGameStart(){
+        for (int i = 0; i < gameModel.getNumberOfRows(); i++) {
+            for (int j = 0; j < gameModel.getNumberOfColumns(); j++) {
+                if(gameModel.getCellOwner(i, j) != null){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }
