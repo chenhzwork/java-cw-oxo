@@ -71,15 +71,10 @@ public class OXOModel {
     }
 
     public void addPlayer(OXOPlayer player) {
-        for (int i = 0; i < players.size(); i++) {
-            if (players[i] == null) {
-                players[i] = player;
-                return;
-            }
-        }
+        players.add(player);
     }
 
-    public int switchPlayer(int curPlayerNum){
+    public void switchPlayer(int curPlayerNum){
         for(int i = 0; i < getNumberOfPlayers(); i++){
             if(i + 1 >= getNumberOfPlayers()){
                 currentPlayerNumber = 0;
@@ -90,11 +85,10 @@ public class OXOModel {
                 break;
             }
         }
-        return currentPlayerNumber;
     }
 
     public OXOPlayer getPlayerByNumber(int number) {
-        return players[number];
+        return players.get(number);
     }
 
     public OXOPlayer getWinner() {

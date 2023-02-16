@@ -218,14 +218,6 @@ public class OXOController {
         }
     }
 
-    public void addPlayer(){
-        char c = 65;
-        for (int i = 0; i < gameModel.getNumberOfPlayers(); i++) {
-            if(c == gameModel.players[i])
-        }
-        OXOPlayer oxoPlayer = new OXOPlayer();
-        gameModel.addPlayer();
-    }
     public void reset() {
         for(int i = 0; i < gameModel.getNumberOfRows(); i++){
             for(int j = 0; j < gameModel.getNumberOfColumns(); j++){
