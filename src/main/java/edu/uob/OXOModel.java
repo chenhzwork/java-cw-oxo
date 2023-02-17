@@ -47,8 +47,7 @@ public class OXOModel {
 
     public void removeRow(){
         int row = getNumberOfRows();
-        if(row <= winThreshold){
-            System.out.println("Cannot remove the row.");
+        if(row < 2){
             return;
         }
         cells.remove(row - 1);
@@ -57,8 +56,7 @@ public class OXOModel {
     public void removeColumn(){
         int clm = getNumberOfColumns();
         int row = getNumberOfRows();
-        if(clm <= winThreshold){
-            System.out.println("Cannot remove the column.");
+        if(clm < 2){
             return;
         }
         for (int i = 0; i < row; i++) {
@@ -142,5 +140,4 @@ public class OXOModel {
     public boolean isGameDrawn() {
         return gameDrawn;
     }
-
 }

@@ -70,4 +70,33 @@ class ExampleControllerTests {
     assertThrows(InvalidIdentifierLengthException.class, ()-> controller.handleIncomingCommand("aa1"));
 
   }
+
+  void multiPlayerSetup() {
+    model = new OXOModel(5, 5, 3);
+    model.addPlayer(new OXOPlayer('X'));
+    model.addPlayer(new OXOPlayer('O'));
+    model.addPlayer(new OXOPlayer('T'));
+    controller = new OXOController(model);
+  }
+  @Test
+  void testMultiPlayerWin() throws OXOMoveException {
+    multiPlayerSetup();
+    // Find out which player is going to make the first move (they should be the eventual winner)
+    OXOPlayer thirdMovingPlayer = model.getPlayerByNumber(model.getCurrentPlayerNumber() + 2);
+    // Make a bunch of moves for the two players
+    sendCommandToController("a1"); // First player
+    sendCommandToController("b1"); // Second player
+    sendCommandToController("a5"); // Third player
+    sendCommandToController("a2"); // First player
+    sendCommandToController("b2"); // Second player
+    sendCommandToController("b4"); // Third player
+    sendCommandToController("c1"); // First player
+    sendCommandToController("d1"); // Second player
+    sendCommandToController("c3"); // Third player
+
+    // a1, a2, a3 should be a win for the first player (since players alternate between moves)
+    // Let's check to see whether the first moving player is indeed the winner
+    String failedTestComment = "Winner was expected to be " + thirdMovingPlayer.getPlayingLetter() + " but wasn't";
+    assertEquals(thirdMovingPlayer, model.getWinner(), failedTestComment);
+  }
 }

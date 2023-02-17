@@ -64,16 +64,10 @@ public class OXOController {
             gameModel.switchPlayer(curPlayerNum);
         }
 
-        int winThreshold = gameModel.getWinThreshold();
-        if(horizontalWin(rowNumber, currPlayer, winThreshold) ||
-            verticalWin(colNumber, currPlayer, winThreshold) ||
-            diagWin(currPlayer, winThreshold)){
-            gameModel.setWinner(currPlayer);
-        }
-
         if(isDraw()){
             gameModel.setGameDrawn();
         }
+        gameModel.setWinner(detectWinner());
     }
 
     private boolean isDraw(){
@@ -178,44 +172,50 @@ public class OXOController {
     }
 
     public void addRow() {
-        if(!gameModel.isGameDrawn() && gameModel.getWinner() == null){
+        if(gameModel.getWinner() == null){
             gameModel.addRow();
+            gameModel.setNotDrawn();
         }
     }
     public void removeRow() {
         if(!gameModel.isGameDrawn() && gameModel.getWinner() == null) {
             gameModel.removeRow();
+            if(isDraw()){
+                gameModel.setGameDrawn();
+            }
         }
     }
     public void addColumn() {
-        if(!gameModel.isGameDrawn() && gameModel.getWinner() == null){
+        if(gameModel.getWinner() == null){
             gameModel.addColumn();
+            gameModel.setNotDrawn();
         }
     }
     public void removeColumn() {
         if(!gameModel.isGameDrawn() && gameModel.getWinner() == null) {
             gameModel.removeColumn();
+            if(isDraw()){
+                gameModel.setGameDrawn();
+            }
         }
     }
     public void increaseWinThreshold() {
-        if(!isGameStart()){
-            gameModel.setWinThreshold(gameModel.getWinThreshold() + 1);
-            System.out.println("The new win threshold is: " + gameModel.getWinThreshold());
-        }else{
-            System.out.println("Ooops, game has begun!");
-        }
-    }
-    public void decreaseWinThreshold() {
-        if(gameModel.getWinThreshold() < 2){
-            System.out.println("Cannot decrease anymore!");
+        gameModel.setWinThreshold(gameModel.getWinThreshold() + 1);
+        if(isDraw()){
+            gameModel.setGameDrawn();
             return;
         }
-        if(!isGameStart()){
-            gameModel.setWinThreshold(gameModel.getWinThreshold() - 1);
-            System.out.println("The new win threshold is: " + gameModel.getWinThreshold());
-        }else{
-            System.out.println("Ooops, game has begun!");
+        gameModel.setWinner(detectWinner());
+        System.out.println("The new win threshold is: " + gameModel.getWinThreshold());
+    }
+    public void decreaseWinThreshold() {
+        gameModel.setWinThreshold(gameModel.getWinThreshold() - 1);
+        if(isDraw()){
+            gameModel.setGameDrawn();
+            return;
         }
+        gameModel.setWinner(detectWinner());
+        System.out.println("The new win threshold is: " + gameModel.getWinThreshold());
     }
 
     public void reset() {
@@ -243,4 +243,28 @@ public class OXOController {
         return false;
     }
 
+    public OXOPlayer detectWinner(){
+        OXOPlayer player;
+        int winThreshold = gameModel.getWinThreshold();
+        if(gameModel.getNumberOfRows() == 1 || gameModel.getNumberOfColumns() == 1){
+            if(winThreshold == 1) {
+                return gameModel.getCellOwner(0, 0);
+            }else{
+                return null;
+            }
+        }
+        for (int i = 0; i < gameModel.getNumberOfPlayers(); i++) {
+            player = gameModel.getPlayerByNumber(i);
+            for (int j = 0; j < gameModel.getNumberOfRows(); j++) {
+                for (int k = 0; k < gameModel.getNumberOfColumns(); k++) {
+                    if(horizontalWin(i, player, winThreshold) ||
+                            verticalWin(j, player, winThreshold) ||
+                            diagWin(player, winThreshold)){
+                        return player;
+                    }
+                }
+            }
+        }
+        return null;
+    }
 }
