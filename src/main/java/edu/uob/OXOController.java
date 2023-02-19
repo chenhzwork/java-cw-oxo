@@ -200,21 +200,27 @@ public class OXOController {
         }
     }
     public void increaseWinThreshold() {
-        gameModel.setWinThreshold(gameModel.getWinThreshold() + 1);
         if(isDraw()){
             gameModel.setGameDrawn();
             return;
         }
+        gameModel.setWinThreshold(gameModel.getWinThreshold() + 1);
         gameModel.setWinner(detectWinner());
         System.out.println("The new win threshold is: " + gameModel.getWinThreshold());
     }
     public void decreaseWinThreshold() {
-        gameModel.setWinThreshold(gameModel.getWinThreshold() - 1);
         if(isDraw()){
             gameModel.setGameDrawn();
             return;
         }
-        gameModel.setWinner(detectWinner());
+        if(gameModel.getWinThreshold() <= 3){
+            System.out.println("The minimum win threshold is 3");
+            return;
+        }
+        gameModel.setWinThreshold(gameModel.getWinThreshold() - 1);
+        if(detectWinner() != null){
+            gameModel.setWinThreshold(gameModel.getWinThreshold() + 1);
+        }
         System.out.println("The new win threshold is: " + gameModel.getWinThreshold());
     }
 
@@ -230,6 +236,7 @@ public class OXOController {
         if(gameModel.isGameDrawn()){
             gameModel.setNotDrawn();
         }
+        gameModel.setCurrentPlayerNumber(0);
     }
 
     public boolean isGameStart(){
