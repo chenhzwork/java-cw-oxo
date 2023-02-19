@@ -31,24 +31,8 @@ public class OXOController {
         }else if(command.charAt(0) >= 65 && command.charAt(0) <= 90){
             rowNumber = command.charAt(0) - 65;
         }
-        int colNumber = 0;
-        if(command.charAt(1) > 48 && command.charAt(1) < 58){
-            colNumber = command.charAt(1) - 49;
-        }
+        int colNumber = command.charAt(1) - '1';
         OXOPlayer currPlayer = gameModel.getPlayerByNumber(curPlayerNum);
-
-
-        if (rowNumber + 1 > gameModel.getNumberOfRows()){
-            throw new OutsideCellRangeException(RowOrColumn.ROW, rowNumber);
-        }
-
-        if (colNumber + 1 > gameModel.getNumberOfColumns()){
-            throw new OutsideCellRangeException(RowOrColumn.COLUMN, colNumber);
-        }
-
-        if (gameModel.getCellOwner(rowNumber, colNumber) != null){
-            throw new CellAlreadyTakenException(rowNumber, colNumber);
-        }
 
         if (command.charAt(0) < 65 || (command.charAt(0) > 73 && command.charAt(0) < 96) || command.charAt(0) > 105){
             throw new InvalidIdentifierCharacterException(RowOrColumn.ROW, command.charAt(0));
@@ -56,6 +40,18 @@ public class OXOController {
 
         if (!Character.isDigit(command.charAt(1))){
             throw new InvalidIdentifierCharacterException(RowOrColumn.COLUMN, command.charAt(1));
+        }
+
+        if (rowNumber + 1 > gameModel.getNumberOfRows()){
+            throw new OutsideCellRangeException(RowOrColumn.ROW, rowNumber);
+        }
+
+        if (colNumber + 1 > gameModel.getNumberOfColumns() || colNumber < 0){
+            throw new OutsideCellRangeException(RowOrColumn.COLUMN, colNumber);
+        }
+
+        if (gameModel.getCellOwner(rowNumber, colNumber) != null){
+            throw new CellAlreadyTakenException(rowNumber, colNumber);
         }
 
         if (gameModel.getCellOwner(rowNumber, colNumber) == null && !gameModel.isGameDrawn()

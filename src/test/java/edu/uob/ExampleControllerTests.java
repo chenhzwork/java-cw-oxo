@@ -68,6 +68,16 @@ class ExampleControllerTests {
     // The next lins is a bit ugly, but it is the easiest way to test exceptions (soz)
     assertThrows(InvalidIdentifierLengthException.class, ()-> sendCommandToController("abc123"), failedTestComment);
     assertThrows(InvalidIdentifierLengthException.class, ()-> controller.handleIncomingCommand("aa1"));
+    assertThrows(InvalidIdentifierLengthException.class, ()-> controller.handleIncomingCommand("1"));
+    assertThrows(InvalidIdentifierLengthException.class, ()-> controller.handleIncomingCommand("a"));
+    assertThrows(OutsideCellRangeException.class, ()-> controller.handleIncomingCommand("d1"));   //row out range
+    assertThrows(OutsideCellRangeException.class, ()-> controller.handleIncomingCommand("a4"));   //col out range
+    assertThrows(OutsideCellRangeException.class, ()-> controller.handleIncomingCommand("b0"));
+    sendCommandToController("a1");
+    assertThrows(CellAlreadyTakenException.class, ()-> controller.handleIncomingCommand("a1"));
+    assertThrows(InvalidIdentifierCharacterException.class, ()-> controller.handleIncomingCommand("@2"));
+    assertThrows(InvalidIdentifierCharacterException.class, ()-> controller.handleIncomingCommand("66"));
+    assertThrows(InvalidIdentifierCharacterException.class, ()-> controller.handleIncomingCommand("a%"));
 
   }
 
