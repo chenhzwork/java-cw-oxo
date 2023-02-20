@@ -168,8 +168,20 @@ public class OXOController {
     }
 
     public void addRow() {
+        if(isDraw() && gameModel.getNumberOfRows() == 9 && gameModel.getNumberOfColumns() == 9){
+            return;
+        }
         if(gameModel.getWinner() == null){
             gameModel.addRow();
+            gameModel.setNotDrawn();
+        }
+    }
+    public void addColumn() {
+        if(isDraw() && gameModel.getNumberOfRows() == 9 && gameModel.getNumberOfColumns() == 9){
+            return;
+        }
+        if(gameModel.getWinner() == null){
+            gameModel.addColumn();
             gameModel.setNotDrawn();
         }
     }
@@ -179,12 +191,6 @@ public class OXOController {
             if(isDraw()){
                 gameModel.setGameDrawn();
             }
-        }
-    }
-    public void addColumn() {
-        if(gameModel.getWinner() == null){
-            gameModel.addColumn();
-            gameModel.setNotDrawn();
         }
     }
     public void removeColumn() {

@@ -1,12 +1,11 @@
 package edu.uob;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import edu.uob.OXOMoveException.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.time.Duration;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class ExampleControllerTests {
   private OXOModel model;
@@ -78,7 +77,21 @@ class ExampleControllerTests {
     assertThrows(InvalidIdentifierCharacterException.class, ()-> controller.handleIncomingCommand("@2"));
     assertThrows(InvalidIdentifierCharacterException.class, ()-> controller.handleIncomingCommand("66"));
     assertThrows(InvalidIdentifierCharacterException.class, ()-> controller.handleIncomingCommand("a%"));
+  }
 
+  @Test
+  void test_draw(){
+    String failedTestComment = "Game is not draw, test failed.";
+    sendCommandToController("a1");
+    sendCommandToController("a2");
+    sendCommandToController("a3");
+    sendCommandToController("b2");
+    sendCommandToController("b1");
+    sendCommandToController("b3");
+    sendCommandToController("c2");
+    sendCommandToController("c1");
+    sendCommandToController("c3");
+    assertTrue(model.isGameDrawn(), failedTestComment);
   }
 
   void multiPlayerSetup() {
@@ -103,9 +116,6 @@ class ExampleControllerTests {
     sendCommandToController("c1"); // First player
     sendCommandToController("d1"); // Second player
     sendCommandToController("c3"); // Third player
-
-    // a1, a2, a3 should be a win for the first player (since players alternate between moves)
-    // Let's check to see whether the first moving player is indeed the winner
     String failedTestComment = "Winner was expected to be " + thirdMovingPlayer.getPlayingLetter() + " but wasn't";
     assertEquals(thirdMovingPlayer, model.getWinner(), failedTestComment);
   }
