@@ -236,6 +236,8 @@ public class OXOController {
         gameModel.setCurrentPlayerNumber(0);
     }
 
+
+
 //    public boolean isGameStart(){
 //        for (int i = 0; i < gameModel.getNumberOfRows(); i++) {
 //            for (int j = 0; j < gameModel.getNumberOfColumns(); j++) {
