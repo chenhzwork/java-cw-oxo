@@ -1,7 +1,5 @@
 package edu.uob;
 import edu.uob.OXOMoveException.*;
-import java.util.Scanner;
-
 
 public class OXOController {
     OXOModel gameModel;
@@ -75,10 +73,7 @@ public class OXOController {
                 }
             }
         }
-        if(drawCounter == 0){
-            return true;
-        }
-        return false;
+        return drawCounter == 0;
     }
 
     private boolean horizontalWin(int rowNumber, OXOPlayer currPlayer, int winThreshold){
@@ -241,16 +236,16 @@ public class OXOController {
         gameModel.setCurrentPlayerNumber(0);
     }
 
-    public boolean isGameStart(){
-        for (int i = 0; i < gameModel.getNumberOfRows(); i++) {
-            for (int j = 0; j < gameModel.getNumberOfColumns(); j++) {
-                if(gameModel.getCellOwner(i, j) != null){
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+//    public boolean isGameStart(){
+//        for (int i = 0; i < gameModel.getNumberOfRows(); i++) {
+//            for (int j = 0; j < gameModel.getNumberOfColumns(); j++) {
+//                if(gameModel.getCellOwner(i, j) != null){
+//                    return true;
+//                }
+//            }
+//        }
+//        return false;
+//    }
 
     public OXOPlayer detectWinner(){
         OXOPlayer player;
@@ -277,3 +272,4 @@ public class OXOController {
         return null;
     }
 }
+
