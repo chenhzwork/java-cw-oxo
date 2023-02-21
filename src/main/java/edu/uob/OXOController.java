@@ -11,15 +11,20 @@ public class OXOController {
     }
 
     public void handleIncomingCommand(String command) throws OXOMoveException {
+        if(gameModel.getNumberOfPlayers() < 2){
+            System.out.println("The minimum player is 2.");
+            return;
+        }
         if(gameModel.isGameDrawn()){
             return;
         }
-
+        if(gameModel.getWinner() != null){
+            return;
+        }
         int len = command.length();
         if (len != 2){
             throw new InvalidIdentifierLengthException(len);
         }
-
         new OXOModel(3, 3, 3);
         int curPlayerNum = gameModel.getCurrentPlayerNumber();
         gameModel.setCurrentPlayerNumber(curPlayerNum);
@@ -52,7 +57,7 @@ public class OXOController {
             throw new CellAlreadyTakenException(rowNumber, colNumber);
         }
 
-        if (gameModel.getCellOwner(rowNumber, colNumber) == null && !gameModel.isGameDrawn()
+        if (gameModel.getCellOwner(rowNumber, colNumber) == null
                 && gameModel.getWinner() == null) {
             gameModel.setCellOwner(rowNumber, colNumber, currPlayer);
             gameModel.switchPlayer(curPlayerNum);
@@ -166,59 +171,66 @@ public class OXOController {
         if(isDraw() && gameModel.getNumberOfRows() == 9 && gameModel.getNumberOfColumns() == 9){
             return;
         }
+        if(gameModel.getNumberOfRows() > 8){
+            System.out.println("The maximum size of the grid is 9x9.");
+            return;
+        }
         if(gameModel.getWinner() == null){
-            gameModel.addRow();
             gameModel.setNotDrawn();
         }
+        gameModel.addRow();
     }
     public void addColumn() {
         if(isDraw() && gameModel.getNumberOfRows() == 9 && gameModel.getNumberOfColumns() == 9){
             return;
         }
+        if(gameModel.getNumberOfColumns() > 8){
+            System.out.println("The maximum size of the grid is 9x9.");
+            return;
+        }
         if(gameModel.getWinner() == null){
-            gameModel.addColumn();
             gameModel.setNotDrawn();
         }
+        gameModel.addColumn();
     }
     public void removeRow() {
-        if(!gameModel.isGameDrawn() && gameModel.getWinner() == null) {
-            gameModel.removeRow();
-            if(isDraw()){
-                gameModel.setGameDrawn();
-            }
+        if(gameModel.getNumberOfRows() < 2){
+            return;
         }
+        gameModel.removeRow();
     }
     public void removeColumn() {
-        if(!gameModel.isGameDrawn() && gameModel.getWinner() == null) {
-            gameModel.removeColumn();
-            if(isDraw()){
-                gameModel.setGameDrawn();
-            }
+        if(gameModel.getNumberOfColumns() < 2){
+            return;
         }
+        gameModel.removeColumn();
     }
     public void increaseWinThreshold() {
         if(isDraw()){
             gameModel.setGameDrawn();
+        }
+        if(gameModel.getWinThreshold() < 3){
+            System.out.println("The minimum win threshold is 3.");
             return;
         }
         gameModel.setWinThreshold(gameModel.getWinThreshold() + 1);
-        gameModel.setWinner(detectWinner());
-        System.out.println("The new win threshold is: " + gameModel.getWinThreshold());
+        System.out.println("The win threshold is: " + gameModel.getWinThreshold());
     }
     public void decreaseWinThreshold() {
+        if(isGameStart() && gameModel.getWinner() == null){
+            System.out.println("The game has started, cannot decrease win threshold.");
+            return;
+        }
         if(isDraw()){
             gameModel.setGameDrawn();
             return;
         }
         if(gameModel.getWinThreshold() <= 3){
-            System.out.println("The minimum win threshold is 3");
+            System.out.println("The minimum win threshold is 3.");
             return;
         }
         gameModel.setWinThreshold(gameModel.getWinThreshold() - 1);
-        if(detectWinner() != null){
-            gameModel.setWinThreshold(gameModel.getWinThreshold() + 1);
-        }
-        System.out.println("The new win threshold is: " + gameModel.getWinThreshold());
+        System.out.println("The win threshold is: " + gameModel.getWinThreshold());
     }
 
     public void reset() {
@@ -236,18 +248,16 @@ public class OXOController {
         gameModel.setCurrentPlayerNumber(0);
     }
 
-
-
-//    public boolean isGameStart(){
-//        for (int i = 0; i < gameModel.getNumberOfRows(); i++) {
-//            for (int j = 0; j < gameModel.getNumberOfColumns(); j++) {
-//                if(gameModel.getCellOwner(i, j) != null){
-//                    return true;
-//                }
-//            }
-//        }
-//        return false;
-//    }
+    public boolean isGameStart(){
+        for (int i = 0; i < gameModel.getNumberOfRows(); i++) {
+            for (int j = 0; j < gameModel.getNumberOfColumns(); j++) {
+                if(gameModel.getCellOwner(i, j) != null){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     public OXOPlayer detectWinner(){
         OXOPlayer player;

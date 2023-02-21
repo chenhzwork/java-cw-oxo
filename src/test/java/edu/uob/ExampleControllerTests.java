@@ -23,7 +23,7 @@ class ExampleControllerTests {
 
   // This next method is a utility function that can be used by any of the test methods to _safely_ send a command to the controller
   void sendCommandToController(String command) {
-      // Try to send a command to the server - call will timeout if it takes too long (in case the server enters an infinite loop)
+      // Try to send a command to the server - call will time out if it takes too long (in case the server enters an infinite loop)
       // Note: this is ugly code and includes syntax that you haven't encountered yet
       String timeoutComment = "Controller took too long to respond (probably stuck in an infinite loop)";
       assertTimeoutPreemptively(Duration.ofMillis(1000), ()-> controller.handleIncomingCommand(command), timeoutComment);
@@ -31,7 +31,7 @@ class ExampleControllerTests {
 
   // Test simple move taking and cell claiming functionality
   @Test
-  void testBasicMoveTaking() throws OXOMoveException {
+  void testBasicMoveTaking() {
     // Find out which player is going to make the first move
     OXOPlayer firstMovingPlayer = model.getPlayerByNumber(model.getCurrentPlayerNumber());
     // Make a move
@@ -43,7 +43,7 @@ class ExampleControllerTests {
 
   // Test out basic win detection
   @Test
-  void testBasicWin() throws OXOMoveException {
+  void testBasicWin() {
     // Find out which player is going to make the first move (they should be the eventual winner)
     OXOPlayer firstMovingPlayer = model.getPlayerByNumber(model.getCurrentPlayerNumber());
     // Make a bunch of moves for the two players
@@ -52,19 +52,147 @@ class ExampleControllerTests {
     sendCommandToController("a2"); // First player
     sendCommandToController("b2"); // Second player
     sendCommandToController("a3"); // First player
-
     // a1, a2, a3 should be a win for the first player (since players alternate between moves)
     // Let's check to see whether the first moving player is indeed the winner
     String failedTestComment = "Winner was expected to be " + firstMovingPlayer.getPlayingLetter() + " but wasn't";
     assertEquals(firstMovingPlayer, model.getWinner(), failedTestComment);
   }
 
+  @Test
+  void testChangeSizeAfterWin() {
+    // Find out which player is going to make the first move (they should be the eventual winner)
+    OXOPlayer firstMovingPlayer = model.getPlayerByNumber(model.getCurrentPlayerNumber());
+    // Make a bunch of moves for the two players
+    sendCommandToController("a1"); // First player
+    sendCommandToController("b1"); // Second player
+    sendCommandToController("a2"); // First player
+    sendCommandToController("b2"); // Second player
+    sendCommandToController("a3"); // First player
+    String failedTestComment = "Winner was expected to be " + firstMovingPlayer.getPlayingLetter() + " but wasn't";
+    assertEquals(firstMovingPlayer, model.getWinner(), failedTestComment);
+    controller.removeRow();
+    assertEquals(2, model.getNumberOfRows(), "Failed to remove row.");
+    controller.addColumn();
+    assertEquals(4, model.getNumberOfColumns(), "Failed to add column.");
+    controller.removeColumn();
+    assertEquals(3, model.getNumberOfColumns(), "Failed to remove column.");
+    controller.removeColumn();
+    assertEquals(3, model.getNumberOfColumns(), "Failed to remove column.");
+    // a1, a2, a3 should be a win for the first player (since players alternate between moves)
+    // Let's check to see whether the first moving player is indeed the winner
+  }
+  @Test
+  void testVerticalWin_Cap() {
+    OXOPlayer firstMovingPlayer = model.getPlayerByNumber(model.getCurrentPlayerNumber());
+    // Make a bunch of moves for the two players
+    sendCommandToController("A1"); // First player
+    sendCommandToController("A2"); // Second player
+    sendCommandToController("B1"); // First player
+    sendCommandToController("B2"); // Second player
+    sendCommandToController("C1"); // First player
+    // a1, a2, a3 should be a win for the first player (since players alternate between moves)
+    // Let's check to see whether the first moving player is indeed the winner
+    String failedTestComment = "Winner was expected to be " + firstMovingPlayer.getPlayingLetter() + " but wasn't";
+    assertEquals(firstMovingPlayer, model.getWinner(), failedTestComment);
+  }
+  @Test
+  void testRightDiagWinAndAdds() {
+    OXOPlayer firstMovingPlayer = model.getPlayerByNumber(model.getCurrentPlayerNumber());
+    sendCommandToController("a1"); // First player
+    sendCommandToController("b1"); // Second player
+    sendCommandToController("c3"); // First player
+    sendCommandToController("a3"); // Second player
+    sendCommandToController("b2"); // First player
+    String failedTestComment = "Winner was expected to be " + firstMovingPlayer.getPlayingLetter() + " but wasn't";
+    assertEquals(firstMovingPlayer, model.getWinner(), failedTestComment);
+    controller.addRow();
+    assertEquals(4, model.getNumberOfRows(), "Add row failed.");
+    controller.addColumn();
+    assertEquals(4, model.getNumberOfColumns(), "Add column failed.");
+    controller.increaseWinThreshold();
+    assertEquals(4, model.getWinThreshold(), "The win threshold cannot be changed.");
+    sendCommandToController("a4");
+    assertNull(model.getCellOwner(0, 3), "Game has won, cannot drop anymore.");
+  }
+  @Test
+  void testLeftDiagWinAndRemoves() {
+    OXOPlayer firstMovingPlayer = model.getPlayerByNumber(model.getCurrentPlayerNumber());
+    sendCommandToController("a3"); // First player
+    sendCommandToController("b1"); // Second player
+    sendCommandToController("c1"); // First player
+    sendCommandToController("a2"); // Second player
+    sendCommandToController("b2"); // First player
+    String failedTestComment = "Winner was expected to be " + firstMovingPlayer.getPlayingLetter() + " but wasn't";
+    assertEquals(firstMovingPlayer, model.getWinner(), failedTestComment);
+    controller.removeRow();
+    assertEquals(3, model.getNumberOfRows(), "The grid cannot be changed.");
+    controller.removeColumn();
+    assertEquals(3, model.getNumberOfColumns(), "The grid cannot be changed.");
+    controller.decreaseWinThreshold();
+    assertEquals(3, model.getWinThreshold(), "The win threshold cannot be changed.");
+  }
+  @Test
+  void testBeforeStartAdds(){
+    //based on 3x3 grid
+    controller.addRow();
+    assertEquals(4, model.getNumberOfRows(), "Add row failed.");
+    controller.addColumn();
+    assertEquals(4, model.getNumberOfColumns(), "Add column failed.");
+    controller.increaseWinThreshold();
+    assertEquals(4, model.getWinThreshold(), "Add win threshold failed.");
+    sendCommandToController("a1");
+    assertSame(model.getCellOwner(0, 0), model.getPlayerByNumber(0), "Add owner failed.");
+    controller.addRow();
+    assertEquals(5, model.getNumberOfRows(), "Add row failed.");
+    controller.addColumn();
+    assertEquals(5, model.getNumberOfColumns(), "Add column failed.");
+    controller.increaseWinThreshold();
+    assertEquals(5, model.getWinThreshold(), "Add win threshold failed.");
+    controller.decreaseWinThreshold();
+    assertEquals(5, model.getWinThreshold(), "Win threshold cannot be decreased after start game.");
+  }
+
+  @Test
+  void testBeforeStartRemoves(){
+    controller.removeRow();
+    assertEquals(2, model.getNumberOfRows(), "Remove row failed.");
+    controller.removeColumn();
+    assertEquals(2, model.getNumberOfColumns(), "Remove column failed.");
+    controller.increaseWinThreshold();
+    controller.increaseWinThreshold();
+    controller.decreaseWinThreshold();
+    assertEquals(4, model.getWinThreshold(), "Change win threshold failed.");
+    sendCommandToController("a1");
+    controller.removeRow();
+    assertEquals(1, model.getNumberOfRows(), "Remove row failed.");
+    controller.removeColumn();
+    assertEquals(1, model.getNumberOfColumns(), "Remove column failed.");
+    //Test the minimum grid is 1x1
+    controller.removeRow();
+    assertEquals(1, model.getNumberOfRows(), "Remove row failed.");
+    controller.removeColumn();
+    assertEquals(1, model.getNumberOfColumns(), "Remove column failed.");
+    //Test after game start, the win threshold cannot be decreased
+    controller.decreaseWinThreshold();
+    assertEquals(4, model.getWinThreshold(), "Decrease win threshold failed.");
+  }
+  @Test
+  void testRemoveTakenCell(){
+    controller.addRow();
+    controller.addColumn();
+    sendCommandToController("b4");
+    sendCommandToController("d3");
+    controller.removeRow();
+    controller.removeColumn();
+    assertEquals(4, model.getNumberOfRows(), "Should not remove a not blank row.");
+    assertEquals(4, model.getNumberOfColumns(), "Should not remove a not blank column.");
+  }
   // Example of how to test for the throwing of exceptions
   @Test
-  void testInvalidIdentifierException() throws OXOMoveException {
+  void testInvalidIdentifierException(){
     // Check that the controller throws a suitable exception when it gets an invalid command
     String failedTestComment = "Controller failed to throw an InvalidIdentifierLengthException for command `abc123`";
-    // The next lins is a bit ugly, but it is the easiest way to test exceptions (soz)
+    // The next lines is a bit ugly, but it is the easiest way to test exceptions (soz)
     assertThrows(InvalidIdentifierLengthException.class, ()-> sendCommandToController("abc123"), failedTestComment);
     assertThrows(InvalidIdentifierLengthException.class, ()-> controller.handleIncomingCommand("aa1"));
     assertThrows(InvalidIdentifierLengthException.class, ()-> controller.handleIncomingCommand("1"));
@@ -92,6 +220,19 @@ class ExampleControllerTests {
     sendCommandToController("c1");
     sendCommandToController("c3");
     assertTrue(model.isGameDrawn(), failedTestComment);
+    //Test whether the grid size can be changed after draw
+    controller.removeRow();
+    assertEquals(3, model.getNumberOfRows(), "The grid cannot be changed.");
+    controller.removeColumn();
+    assertEquals(3, model.getNumberOfColumns(), "The grid cannot be changed.");
+    controller.decreaseWinThreshold();
+    assertEquals(3, model.getWinThreshold(), "Increase win threshold failed.");
+    controller.addRow();
+    assertEquals(4, model.getNumberOfRows(), "Add row failed.");
+    controller.addColumn();
+    assertEquals(4, model.getNumberOfColumns(), "Add column failed.");
+    controller.increaseWinThreshold();
+    assertEquals(4, model.getWinThreshold(), "Increase win threshold failed.");
   }
 
   void multiPlayerSetup() {
@@ -102,7 +243,7 @@ class ExampleControllerTests {
     controller = new OXOController(model);
   }
   @Test
-  void testMultiPlayerWin() throws OXOMoveException {
+  void testMultiPlayerWin(){
     multiPlayerSetup();
     // Find out which player is going to make the first move (they should be the eventual winner)
     OXOPlayer thirdMovingPlayer = model.getPlayerByNumber(model.getCurrentPlayerNumber() + 2);
@@ -118,5 +259,43 @@ class ExampleControllerTests {
     sendCommandToController("c3"); // Third player
     String failedTestComment = "Winner was expected to be " + thirdMovingPlayer.getPlayingLetter() + " but wasn't";
     assertEquals(thirdMovingPlayer, model.getWinner(), failedTestComment);
+    controller.reset();
+    String failResetPlayer = "The current player after reset should be 0.";
+    assertEquals(0, model.getCurrentPlayerNumber(), failResetPlayer);
+  }
+
+  void the9x9Setup() {
+    model = new OXOModel(9, 9, 100);
+    model.addPlayer(new OXOPlayer('X'));
+    model.addPlayer(new OXOPlayer('O'));
+    controller = new OXOController(model);
+  }
+
+  @Test
+  void testAfter9x9Draw(){
+    String failedTestComment = "Test failed, the game should remain draw.";
+    the9x9Setup();
+    for (char i = 'a'; i < 'j'; i++) {
+      for (int j = 1; j < 10; j++) {
+        sendCommandToController("" + i + j);
+      }
+    }
+    assertTrue(model.isGameDrawn(), "Failed to set a draw board.");
+    controller.addColumn();
+    controller.addRow();
+    assertTrue (model.isGameDrawn(), failedTestComment);
+  }
+
+  void singlePlayerSetup() {
+    model = new OXOModel(3, 3, 3);
+    model.addPlayer(new OXOPlayer('X'));
+    controller = new OXOController(model);
+  }
+  @Test
+  void testSinglePlayer(){
+    String failedTestComment = "Test failed, the minimum player is 2.";
+    singlePlayerSetup();
+    sendCommandToController("a1");
+    assertNull(model.getCellOwner(0, 0), failedTestComment);
   }
 }

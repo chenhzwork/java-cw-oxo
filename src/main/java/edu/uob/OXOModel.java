@@ -24,6 +24,9 @@ public class OXOModel {
     }
 
     public void addRow(){
+        if(isGameDrawn() && getNumberOfRows() == 9 && getNumberOfColumns() == 9){
+            return;
+        }
         if(getNumberOfRows() > 8){
             System.out.println("The maximum size of the grid is 9x9.");
             return;
@@ -36,6 +39,9 @@ public class OXOModel {
     }
 
     public void addColumn(){
+        if(isGameDrawn() && getNumberOfRows() == 9 && getNumberOfColumns() == 9){
+            return;
+        }
         if(getNumberOfColumns() > 8){
             System.out.println("The maximum size of the grid is 9x9.");
             return;
@@ -47,20 +53,42 @@ public class OXOModel {
 
     public void removeRow(){
         int row = getNumberOfRows();
+        for (int j = 0; j < getNumberOfColumns(); j++) {
+            if(getCellOwner(getNumberOfRows() - 1, j) != null){
+                System.out.println("Cannot remove the row because it is not blank.");
+                return;
+            }
+        }
         if(row < 2){
             return;
         }
-        cells.remove(row - 1);
+        if(!isGameDrawn()) {
+            cells.remove(row - 1);
+            if(isGameDrawn()){
+                setGameDrawn();
+            }
+        }
     }
 
     public void removeColumn(){
         int clm = getNumberOfColumns();
-        int row = getNumberOfRows();
+        for (int i = 0; i < getNumberOfRows(); i++) {
+            if(getCellOwner(i, getNumberOfColumns() - 1) != null){
+                System.out.println("Cannot remove the column because it is not blank.");
+                return;
+            }
+        }
         if(clm < 2){
             return;
         }
-        for (int i = 0; i < row; i++) {
-            cells.get(i).remove(clm - 1);
+        int row = getNumberOfRows();
+        if(!isGameDrawn()) {
+            for (int i = 0; i < row; i++) {
+                cells.get(i).remove(clm - 1);
+            }
+            if(isGameDrawn()){
+                setGameDrawn();
+            }
         }
     }
 
@@ -69,7 +97,9 @@ public class OXOModel {
     }
 
     public void addPlayer(OXOPlayer player) {
-        players.add(player);
+        if(!isGameDrawn() && getWinner() == null){
+            players.add(player);
+        }
     }
 
     public void switchPlayer(int curPlayerNum){
