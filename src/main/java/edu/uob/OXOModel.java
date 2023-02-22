@@ -28,8 +28,10 @@ public class OXOModel {
             return;
         }
         if(getNumberOfRows() > 8){
-            System.out.println("The maximum size of the grid is 9x9.");
             return;
+        }
+        if(getWinner() == null){
+            setNotDrawn();
         }
         ArrayList<OXOPlayer> row = new ArrayList<>();
         for (int i = 0; i < getNumberOfColumns(); i++) {
@@ -43,8 +45,10 @@ public class OXOModel {
             return;
         }
         if(getNumberOfColumns() > 8){
-            System.out.println("The maximum size of the grid is 9x9.");
             return;
+        }
+        if(getWinner() == null){
+            setNotDrawn();
         }
         for (int j = 0; j < getNumberOfRows(); j++) {
             cells.get(j).add(null);
@@ -55,7 +59,6 @@ public class OXOModel {
         int row = getNumberOfRows();
         for (int j = 0; j < getNumberOfColumns(); j++) {
             if(getCellOwner(getNumberOfRows() - 1, j) != null){
-                System.out.println("Cannot remove the row because it is not blank.");
                 return;
             }
         }
@@ -64,9 +67,6 @@ public class OXOModel {
         }
         if(!isGameDrawn()) {
             cells.remove(row - 1);
-            if(isGameDrawn()){
-                setGameDrawn();
-            }
         }
     }
 
@@ -74,7 +74,6 @@ public class OXOModel {
         int clm = getNumberOfColumns();
         for (int i = 0; i < getNumberOfRows(); i++) {
             if(getCellOwner(i, getNumberOfColumns() - 1) != null){
-                System.out.println("Cannot remove the column because it is not blank.");
                 return;
             }
         }
@@ -85,9 +84,6 @@ public class OXOModel {
         if(!isGameDrawn()) {
             for (int i = 0; i < row; i++) {
                 cells.get(i).remove(clm - 1);
-            }
-            if(isGameDrawn()){
-                setGameDrawn();
             }
         }
     }
@@ -169,5 +165,28 @@ public class OXOModel {
 
     public boolean isGameDrawn() {
         return gameDrawn;
+    }
+
+    public boolean isGameStart(){
+        for (int i = 0; i < getNumberOfRows(); i++) {
+            for (int j = 0; j < getNumberOfColumns(); j++) {
+                if(getCellOwner(i, j) != null){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean detectDraw(){
+        int drawCounter = 0;
+        for (int i = 0; i < getNumberOfRows(); i++) {
+            for (int j = 0; j < getNumberOfColumns(); j++) {
+                if(getCellOwner(i, j) == null){
+                    drawCounter++;
+                }
+            }
+        }
+        return drawCounter == 0;
     }
 }

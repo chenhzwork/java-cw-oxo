@@ -94,6 +94,8 @@ class ExampleControllerTests {
     // Let's check to see whether the first moving player is indeed the winner
     String failedTestComment = "Winner was expected to be " + firstMovingPlayer.getPlayingLetter() + " but wasn't";
     assertEquals(firstMovingPlayer, model.getWinner(), failedTestComment);
+    sendCommandToController("A3");
+    assertNull(model.getCellOwner(0, 2), "The game has already won.");
   }
   @Test
   void testRightDiagWinAndAdds() {
@@ -158,6 +160,8 @@ class ExampleControllerTests {
     assertEquals(2, model.getNumberOfRows(), "Remove row failed.");
     controller.removeColumn();
     assertEquals(2, model.getNumberOfColumns(), "Remove column failed.");
+    controller.decreaseWinThreshold();
+    assertEquals(3, model.getWinThreshold(), "The minimum win threshold is 3.");
     controller.increaseWinThreshold();
     controller.increaseWinThreshold();
     controller.decreaseWinThreshold();
@@ -275,6 +279,10 @@ class ExampleControllerTests {
   void testAfter9x9Draw(){
     String failedTestComment = "Test failed, the game should remain draw.";
     the9x9Setup();
+    controller.addRow();
+    assertEquals(9, model.getNumberOfRows(), "The max size of the grid is 9x9.");
+    controller.addColumn();
+    assertEquals(9, model.getNumberOfColumns(), "The max size of the grid is 9x9.");
     for (char i = 'a'; i < 'j'; i++) {
       for (int j = 1; j < 10; j++) {
         sendCommandToController("" + i + j);
@@ -297,5 +305,18 @@ class ExampleControllerTests {
     singlePlayerSetup();
     sendCommandToController("a1");
     assertNull(model.getCellOwner(0, 0), failedTestComment);
+  }
+
+  void setUpInvalidWinThresholdSetup() {
+    model = new OXOModel(3, 3, 2);
+    model.addPlayer(new OXOPlayer('X'));
+    model.addPlayer(new OXOPlayer('O'));
+    controller = new OXOController(model);
+  }
+@Test
+  void testWinThreshold(){
+    setUpInvalidWinThresholdSetup();
+    sendCommandToController("a1");
+    assertNull(model.getCellOwner(0, 0), "The model is invalid because the win threshold.");
   }
 }
