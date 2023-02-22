@@ -24,7 +24,7 @@ public class OXOModel {
     }
 
     public void addRow(){
-        if(isGameDrawn() && getNumberOfRows() == 9 && getNumberOfColumns() == 9){
+        if(isGameDrawn() && getNumberOfRows() == 9){
             return;
         }
         if(getNumberOfRows() > 8){
@@ -41,7 +41,7 @@ public class OXOModel {
     }
 
     public void addColumn(){
-        if(isGameDrawn() && getNumberOfRows() == 9 && getNumberOfColumns() == 9){
+        if(isGameDrawn() && getNumberOfColumns() == 9){
             return;
         }
         if(getNumberOfColumns() > 8){
@@ -68,6 +68,9 @@ public class OXOModel {
         if(!isGameDrawn()) {
             cells.remove(row - 1);
         }
+        if(detectDraw()){
+            setGameDrawn();
+        }
     }
 
     public void removeColumn(){
@@ -85,6 +88,9 @@ public class OXOModel {
             for (int i = 0; i < row; i++) {
                 cells.get(i).remove(clm - 1);
             }
+        }
+        if(detectDraw()){
+            setGameDrawn();
         }
     }
 

@@ -57,7 +57,45 @@ class ExampleControllerTests {
     String failedTestComment = "Winner was expected to be " + firstMovingPlayer.getPlayingLetter() + " but wasn't";
     assertEquals(firstMovingPlayer, model.getWinner(), failedTestComment);
   }
-
+@Test
+  void testWinDrawHappensTogether(){
+    sendCommandToController("c1");
+    sendCommandToController("c2");
+    sendCommandToController("c3");
+    sendCommandToController("b1");
+    sendCommandToController("b2");
+    sendCommandToController("b3");
+    sendCommandToController("a2");
+    sendCommandToController("a1");
+    sendCommandToController("a3");
+    assertEquals('X', model.getWinner().getPlayingLetter());
+    assertFalse(model.isGameDrawn());
+  }
+  @Test
+  void remove3x3RowToDraw(){
+    sendCommandToController("a1");
+    sendCommandToController("a2");
+    sendCommandToController("a3");
+    sendCommandToController("b1");
+    sendCommandToController("b2");
+    sendCommandToController("b3");
+    assertFalse(model.isGameDrawn());
+    controller.removeRow();
+    assertTrue(model.isGameDrawn());
+  }
+  @Test
+  void oneCellAndThreshold(){
+    controller.decreaseWinThreshold();
+    assertSame(3, model.getWinThreshold(), "The minimum win threshold is 3.");
+    controller.removeRow();
+    controller.removeRow();
+    controller.removeColumn();
+    controller.removeColumn();
+    sendCommandToController("a1");
+    assertTrue(model.isGameDrawn());
+    controller.reset();
+    assertFalse(model.isGameDrawn());
+  }
   @Test
   void testChangeSizeAfterWin() {
     // Find out which player is going to make the first move (they should be the eventual winner)
@@ -307,16 +345,75 @@ class ExampleControllerTests {
     assertNull(model.getCellOwner(0, 0), failedTestComment);
   }
 
-  void setUpInvalidWinThresholdSetup() {
-    model = new OXOModel(3, 3, 2);
+  void setUpRectangle(){
+    model = new OXOModel(3, 4, 4);
     model.addPlayer(new OXOPlayer('X'));
     model.addPlayer(new OXOPlayer('O'));
     controller = new OXOController(model);
   }
-@Test
-  void testWinThreshold(){
-    setUpInvalidWinThresholdSetup();
+  @Test
+  void testRec(){
+    setUpRectangle();
     sendCommandToController("a1");
-    assertNull(model.getCellOwner(0, 0), "The model is invalid because the win threshold.");
+    sendCommandToController("b1");
+    sendCommandToController("a2");
+    sendCommandToController("b2");
+    sendCommandToController("a3");
+    sendCommandToController("b3");
+    sendCommandToController("a4");
+    assertSame(model.getWinner(), model.getPlayerByNumber(0), "Failed to the rectangle.");
+  }
+
+  void setUpRectangle2(){
+    model = new OXOModel(4, 3, 4);
+    model.addPlayer(new OXOPlayer('X'));
+    model.addPlayer(new OXOPlayer('O'));
+    controller = new OXOController(model);
+  }
+  @Test
+  void testRec2(){
+    setUpRectangle2();
+    sendCommandToController("a1");
+    sendCommandToController("a2");
+    sendCommandToController("b1");
+    sendCommandToController("b2");
+    sendCommandToController("c1");
+    sendCommandToController("c2");
+    sendCommandToController("d1");
+    assertSame(model.getWinner(), model.getPlayerByNumber(0), "Failed to the rectangle.");
+  }
+
+  void setUpRectangle3(){
+    model = new OXOModel(4, 3, 3);
+    model.addPlayer(new OXOPlayer('X'));
+    model.addPlayer(new OXOPlayer('O'));
+    controller = new OXOController(model);
+  }
+  @Test
+  void testRec3(){
+    setUpRectangle3();
+    sendCommandToController("a1");
+    sendCommandToController("a2");
+    sendCommandToController("b2");
+    sendCommandToController("b1");
+    sendCommandToController("c3");
+    assertSame(model.getWinner(), model.getPlayerByNumber(0), "Failed to the rectangle.");
+  }
+
+  void setUpRectangle4(){
+    model = new OXOModel(3, 4, 3);
+    model.addPlayer(new OXOPlayer('X'));
+    model.addPlayer(new OXOPlayer('O'));
+    controller = new OXOController(model);
+  }
+  @Test
+  void testRec4(){
+    setUpRectangle4();
+    sendCommandToController("c4");
+    sendCommandToController("a3");
+    sendCommandToController("b3");
+    sendCommandToController("b1");
+    sendCommandToController("a2");
+    assertSame(model.getWinner(), model.getPlayerByNumber(0), "Failed to the rectangle.");
   }
 }
