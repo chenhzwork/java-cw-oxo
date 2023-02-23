@@ -69,7 +69,8 @@ public class OXOModel {
             cells.remove(row - 1);
         }
         if(detectDraw()){
-            setGameDrawn();
+            System.out.println("Cannot remove row, it will cause draw.");
+            addRow();
         }
     }
 
@@ -90,7 +91,8 @@ public class OXOModel {
             }
         }
         if(detectDraw()){
-            setGameDrawn();
+            System.out.println("Cannot remove column, it will cause draw.");
+            addColumn();
         }
     }
 

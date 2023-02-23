@@ -81,7 +81,8 @@ class ExampleControllerTests {
     sendCommandToController("b3");
     assertFalse(model.isGameDrawn());
     controller.removeRow();
-    assertTrue(model.isGameDrawn());
+    assertSame(3, model.getNumberOfRows(), "Cannot remove row, it leads to draw.");
+    assertFalse(model.isGameDrawn());
   }
   @Test
   void oneCellAndThreshold(){
@@ -208,12 +209,10 @@ class ExampleControllerTests {
     controller.removeRow();
     assertEquals(1, model.getNumberOfRows(), "Remove row failed.");
     controller.removeColumn();
-    assertEquals(1, model.getNumberOfColumns(), "Remove column failed.");
+    assertEquals(2, model.getNumberOfColumns(), "Cannot remove column here.");
     //Test the minimum grid is 1x1
     controller.removeRow();
-    assertEquals(1, model.getNumberOfRows(), "Remove row failed.");
-    controller.removeColumn();
-    assertEquals(1, model.getNumberOfColumns(), "Remove column failed.");
+    assertEquals(1, model.getNumberOfRows(), "Cannot remove row here.");
     //Test after game start, the win threshold cannot be decreased
     controller.decreaseWinThreshold();
     assertEquals(4, model.getWinThreshold(), "Decrease win threshold failed.");
